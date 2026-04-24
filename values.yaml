@@ -1,0 +1,134 @@
+# =============================================================================
+# ArgoCD Manifest — values.yaml
+# Repository : medimesh-org/argocd-manifests
+#
+# This file is automatically updated by the CI/CD pipeline (Job 8 — CD).
+# ArgoCD watches this repo and syncs to the cluster on every commit.
+#
+# Naming convention: medimesh-<service>
+# =============================================================================
+
+# ---------------------------------------------------------------------------
+# Global settings
+# ---------------------------------------------------------------------------
+global:
+  registry: docker.io
+  pullPolicy: IfNotPresent
+  namespace: medimesh
+
+# ---------------------------------------------------------------------------
+# Auth Service
+# ---------------------------------------------------------------------------
+auth:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: medimesh-auth
+    tag: dev-0000000       # ← Auto-updated by CI/CD pipeline
+  service:
+    port: 5001
+  env:
+    MONGO_URI: "mongodb://mongodb:27017/auth"
+    JWT_SECRET: "change-me-in-production"
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+
+# ---------------------------------------------------------------------------
+# Doctor Service
+# ---------------------------------------------------------------------------
+doctor:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: medimesh-doctor
+    tag: dev-0000000       # ← Auto-updated by CI/CD pipeline
+  service:
+    port: 5002
+  env:
+    MONGO_URI: "mongodb://mongodb:27017/doctor"
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+
+# ---------------------------------------------------------------------------
+# Patient Service
+# ---------------------------------------------------------------------------
+patient:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: medimesh-patient
+    tag: dev-0000000       # ← Auto-updated by CI/CD pipeline
+  service:
+    port: 5003
+  env:
+    MONGO_URI: "mongodb://mongodb:27017/patient"
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+
+# ---------------------------------------------------------------------------
+# Appointment Service
+# ---------------------------------------------------------------------------
+appointment:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: medimesh-appointment
+    tag: dev-0000000       # ← Auto-updated by CI/CD pipeline
+  service:
+    port: 5004
+  env:
+    MONGO_URI: "mongodb://mongodb:27017/appointment"
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "256Mi"
+
+# ---------------------------------------------------------------------------
+# Frontend
+# ---------------------------------------------------------------------------
+frontend:
+  enabled: true
+  replicaCount: 2
+  image:
+    repository: medimesh-frontend
+    tag: dev-0000000       # ← Auto-updated by CI/CD pipeline
+  service:
+    port: 3000
+    type: LoadBalancer
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "500m"
+      memory: "512Mi"
+
+# ---------------------------------------------------------------------------
+# MongoDB (shared, in-cluster — replace with Atlas in production)
+# ---------------------------------------------------------------------------
+mongodb:
+  enabled: true
+  image:
+    repository: mongo
+    tag: "7.0"
+  persistence:
+    enabled: true
+    size: 10Gi
