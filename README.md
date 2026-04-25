@@ -10,45 +10,36 @@ This repository follows a **two-branch GitOps strategy**: the `dev` branch drive
 
 ```
 argoCD-manifests/
-├── values.yaml                          ← Single source of truth for all chart values
-├── charts/
-│   ├── auth-service/                    ← Helm chart: auth microservice
-│   │   ├── Chart.yaml
-│   │   └── templates/
-│   │       ├── deployment.yaml
-│   │       ├── service.yaml
-│   │       ├── configmap.yaml
-│   │       ├── secret.yaml
-│   │       └── networkpolicy.yaml
-│   ├── patient-service/                 ← Helm chart: patient microservice
-│   ├── doctor-service/                  ← Helm chart: doctor microservice
-│   ├── appointment-service/             ← Helm chart: appointment microservice
-│   ├── frontend/                        ← Helm chart: React frontend
-│   ├── mongodb/                         ← Shared Helm chart (deployed 4× via release name)
-│   │   └── templates/
-│   │       ├── statefulset.yaml
-│   │       ├── service.yaml
-│   │       ├── secret.yaml
-│   │       └── networkpolicy.yaml
-│   └── gateway/                         ← KGateway + HTTPRoutes + NodePort
-│       └── templates/
-│           ├── gatewayclass.yaml
-│           ├── gateway.yaml
-│           ├── gateway-nodeport.yaml
-│           └── httproutes.yaml
+├── caresync-helm/                       ← Unified Helm chart (all services + infra)
+│   ├── Chart.yaml
+│   ├── values.yaml                      ← Base defaults (overridden per environment)
+│   ├── values-dev.yaml                  ← Dev environment overrides
+│   ├── values-prod.yaml                 ← Prod environment overrides
+│   └── templates/
+│       ├── _helpers.tpl
+│       ├── configmap.yaml               ← SERVICE_URLs + MONGO_URIs per env
+│       ├── secrets.yaml                 ← JWT secret (create: true/false)
+│       ├── deployments.yaml             ← 4 microservice Deployments
+│       ├── rollout.yaml                 ← Frontend BlueGreen Rollout (Argo Rollouts)
+│       ├── statefulsets.yaml            ← 4 MongoDB StatefulSets + headless Services
+│       ├── services.yaml                ← ClusterIP Services for all microservices
+│       ├── storage.yaml                 ← PVCs (dynamic NFS, ReadWriteOnce)
+│       ├── gateway.yaml                 ← KGateway + NodePort Service + HTTPRoutes
+│       ├── hpa.yaml                     ← HorizontalPodAutoscalers (all services)
+│       ├── rbac.yaml                    ← ServiceAccounts, Roles, RoleBindings
+│       └── network-policies.yaml        ← NetworkPolicies (default-deny + allow rules)
+├── argocd/
+│   ├── project.yaml                     ← ArgoCD AppProject (caresync)
+│   ├── app-dev.yaml                     ← ArgoCD Application → caresync-dev
+│   └── app-prod.yaml                    ← ArgoCD Application → caresync-prod
 ├── bootstrap/
 │   ├── namespace-dev.yaml               ← caresync-dev namespace
-│   ├── namespace-prod.yaml              ← caresync-prod namespace
-│   └── storageclass.yaml                ← NFS StorageClass
-├── argocd-apps/
-│   ├── project.yaml                     ← ArgoCD AppProject (caresync)
-│   ├── dev/                             ← 10 ArgoCD Application CRs for dev
-│   └── prod/                            ← 10 ArgoCD Application CRs for prod
+│   └── namespace-prod.yaml              ← caresync-prod namespace
 ├── setup/
 │   ├── nfs-setup.sh                     ← NFS server setup (run on EC2-4)
-│   ├── haproxy.cfg                      ← HAProxy configuration (run on EC2-4)
-│   ├── cluster-setup.sh                 ← kubeadm cluster setup (all nodes)
-│   └── argocd-install.sh                ← ArgoCD + full bootstrap (run on master)
+│   ├── haproxy.cfg                      ← HAProxy config (TCP round-robin to :30080)
+│   ├── cluster-setup.sh                 ← kubeadm + Weave Net setup (all nodes)
+│   └── argocd-install.sh                ← Full bootstrap script (run on master)
 └── README.md
 ```
 
@@ -534,3 +525,94 @@ Developer push to production branch
 | `nandana2002/caresync-doctor`      | doctor-service      |
 | `nandana2002/caresync-appointment` | appointment-service |
 | `nandana2002/caresync-frontend`    | frontend            |
+
+---
+
+## Troubleshooting
+
+### MongoDB pods stuck at `0/1 Running` — probes timing out
+
+**Symptom:** MongoDB pods restart every ~60s. Events show:
+`command timed out: "mongosh --eval db.adminCommand('ping')" timed out after 1s`
+
+**Root cause:** `timeoutSeconds` was not set → defaults to `1s`. `mongosh` takes 2–4s to start
+on constrained CPU (200m request) over NFS I/O. The liveness probe killed MongoDB after 3 failures.
+`Exit Code: 0` confirms a clean kill by the probe, not a crash.
+
+**Fix (applied in `statefulsets.yaml`):**
+```yaml
+livenessProbe:
+  exec:
+    command: [mongosh, --quiet, --eval, "db.adminCommand('ping')"]
+  timeoutSeconds: 10    # ← key fix; was unset (defaulted to 1s)
+  failureThreshold: 3
+readinessProbe:
+  exec:
+    command: [mongosh, --quiet, --eval, "db.adminCommand('ping')"]
+  timeoutSeconds: 10
+  failureThreshold: 3
+```
+
+---
+
+### Service pods stuck at `Init:0/1`
+
+**Symptom:** `caresync-*-service` pods show `Init:0/1` indefinitely.
+
+**Root cause:** Init container runs `nc -z caresync-*-mongodb 27017`. The headless Service
+only routes DNS to **Ready** pods. Since MongoDB readiness was failing (see above), `nc` could
+never connect → init container loops forever.
+
+**Fix:** Fixing the MongoDB probe timeout above unblocks init containers automatically.
+
+---
+
+### ArgoCD shows `caresync-secrets` as `OutOfSync / Missing`
+
+**Symptom:** ArgoCD reports the Secret as OutOfSync. All services crash — `JWT_SECRET` env var is empty.
+
+**Cause:** `values-dev.yaml` had `jwtSecret: ""` → Helm created a Secret with an empty value.
+
+**Fix — Option A (dev, simple):** Set the value in `values-dev.yaml`:
+```yaml
+secrets:
+  create: true
+  jwtSecret: "caresync_jwt_dev_secret_2024"
+```
+
+**Fix — Option B (production, secure):** Create the secret manually and disable Helm management:
+```bash
+kubectl create secret generic caresync-secrets \
+  --from-literal=JWT_SECRET="<your-real-secret>" \
+  --namespace caresync-dev \
+  --dry-run=client -o yaml | kubectl apply -f -
+```
+Then set `secrets.create: false` in `values-dev.yaml`.
+
+> **Never commit real production secrets to Git.** Use Sealed Secrets or External Secrets Operator for production.
+
+---
+
+### HAProxy returns 503 for all requests
+
+**Symptom:** All HTTP requests through EC2-4 return 503.
+
+**Root cause:** `haproxy.cfg` used `option httpchk GET /health`. The kgateway Envoy proxy has no
+`/health` endpoint on port 30080 → HAProxy marks both workers as DOWN → all traffic dropped.
+
+**Fix (applied in `setup/haproxy.cfg`):** Changed to `option tcp-check`.
+After copying the updated config to EC2-4:
+```bash
+sudo cp setup/haproxy.cfg /etc/haproxy/haproxy.cfg
+sudo haproxy -c -f /etc/haproxy/haproxy.cfg   # validate
+sudo systemctl restart haproxy
+```
+
+---
+
+### ArgoCD `applicationset-controller` in CrashLoopBackOff
+
+**Symptom:** `argocd-applicationset-controller` pod shows `CrashLoopBackOff`. All other ArgoCD pods are fine.
+
+**Impact:** None for this project — ApplicationSets are not used here. All apps are standalone
+`Application` CRDs applied directly. You can safely ignore this crash.

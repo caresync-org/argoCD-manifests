@@ -89,12 +89,14 @@ echo ""
 # sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
 # sudo chown $(id -u):$(id -g) $HOME/.kube/config
 #
-# echo "=== [SECTION B] Installing Flannel CNI ==="
-# kubectl apply -f https://raw.githubusercontent.com/flannel-io/flannel/master/Documentation/kube-flannel.yml
+# echo "=== [SECTION B] Installing Weave Net CNI ==="
+# kubectl apply -f https://reweave.azurewebsites.net/k8s/v1.29/net.yaml
 #
 # echo ""
 # echo "=== [SECTION B] COMPLETE ==="
 # echo "Copy the kubeadm join command printed above and run it on each worker node."
+# echo "Also install nfs-common on this node for the NFS provisioner:"
+# echo "  sudo apt-get install -y nfs-common"
 # echo "Verify nodes with: kubectl get nodes"
 
 # =============================================================================

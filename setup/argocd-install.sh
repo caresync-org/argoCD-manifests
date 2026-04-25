@@ -91,7 +91,32 @@ echo "=== Step 7: Apply ArgoCD Project ==="
 kubectl apply -f argocd-apps/project.yaml
 
 # =============================================================================
-echo "=== Step 8: Deploy DEV Environment (ArgoCD Applications) ==="
+echo "=== Step 8: Install Argo Rollouts (required for frontend BlueGreen) ==="
+# =============================================================================
+kubectl create namespace argo-rollouts --dry-run=client -o yaml | kubectl apply -f -
+kubectl apply -n argo-rollouts \
+  -f https://github.com/argoproj/argo-rollouts/releases/latest/download/install.yaml
+
+echo "=== Waiting for Argo Rollouts controller ==="
+kubectl wait --for=condition=available deployment/argo-rollouts \
+  -n argo-rollouts --timeout=120s || true
+
+# =============================================================================
+echo "=== Step 9: Create JWT Secret (must exist before ArgoCD syncs) ==="
+# =============================================================================
+echo "IMPORTANT: Replace the value below with your real JWT secret before running!"
+JWT_SECRET="caresync_jwt_dev_secret_2024"   # <-- change for production
+
+kubectl create namespace caresync-dev --dry-run=client -o yaml | kubectl apply -f -
+kubectl create secret generic caresync-secrets \
+  --from-literal=JWT_SECRET="${JWT_SECRET}" \
+  --namespace caresync-dev \
+  --dry-run=client -o yaml | kubectl apply -f -
+
+echo "JWT secret created in caresync-dev."
+
+# =============================================================================
+echo "=== Step 10: Deploy DEV Environment (ArgoCD Applications) ==="
 # =============================================================================
 kubectl apply -f argocd-apps/dev/
 

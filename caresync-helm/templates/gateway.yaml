@@ -1,6 +1,20 @@
 ---
-# ── Gateway: NodePort proxy config (kgateway) ─────────────────────────────────
-
+# ── Gateway: NodePort Service (exposes kgateway Envoy proxy to HAProxy) ────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.gateway.name }}-nodeport
+  namespace: {{ .Values.global.namespace }}
+spec:
+  type: NodePort
+  selector:
+    gateway.networking.k8s.io/gateway-name: {{ .Values.gateway.name }}
+  ports:
+    - name: http
+      port: {{ .Values.gateway.port }}
+      protocol: TCP
+      targetPort: {{ .Values.gateway.port }}
+      nodePort: {{ .Values.gateway.nodePort }}
 ---
 # ── Gateway Resource ──────────────────────────────────────────────────────────
 apiVersion: gateway.networking.k8s.io/v1
