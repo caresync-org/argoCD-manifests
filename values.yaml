@@ -1,11 +1,11 @@
-# =============================================================================
+
 # ArgoCD Manifest — values.yaml
 # Repository : caresync-org/argoCD-manifests
 # Branch     : dev
 #
 # This file is automatically updated by the CI/CD pipeline (Job 5 — CD).
 # ArgoCD watches this repo and syncs to the cluster on every commit.
-# =============================================================================
+
 
 global:
   registry: docker.io
