@@ -1,6 +1,0 @@
-apiVersion: v2
-name: patient-service
-description: CareSync Patient Service Helm Chart
-type: application
-version: 1.0.0
-appVersion: "1.0.0"
