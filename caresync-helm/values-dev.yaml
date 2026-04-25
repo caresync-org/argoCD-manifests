@@ -51,7 +51,7 @@ patient:
 doctor:
   name: caresync-doctor-service
   image: caresync-doctor
-  tag: v0.0.1-dev.0
+  tag: v0.1.0-dev.0
   replicas: 1
   port: 4003
   resources:
@@ -155,7 +155,7 @@ config:
   appointmentMongoUri: "mongodb://caresync-appointment-mongodb.caresync-dev.svc.cluster.local:27017/appointment-db"
 secrets:
   create: true
-  jwtSecret: "caresync_jwt_dev_secret_2024"
+  jwtSecret: ""
 hpa:
   enabled: true
   minReplicas: 1
