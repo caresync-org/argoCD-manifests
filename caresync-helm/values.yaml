@@ -89,8 +89,7 @@ authMongodb:
   tag: "7.0"
   port: 27017
   storage: 2Gi
-  nfsServer: 172.31.26.181
-  nfsPath: /srv/nfs/caresync/dev/auth
+  storageClassName: "nfs-client"    # ← dynamic provisioning
   resources:
     requests:
       cpu: 200m
@@ -106,8 +105,7 @@ patientMongodb:
   tag: "7.0"
   port: 27017
   storage: 2Gi
-  nfsServer: 172.31.26.181
-  nfsPath: /srv/nfs/caresync/dev/patient
+  storageClassName: "nfs-client"    # ← dynamic provisioning
   resources:
     requests:
       cpu: 200m
@@ -123,8 +121,7 @@ doctorMongodb:
   tag: "7.0"
   port: 27017
   storage: 2Gi
-  nfsServer: 172.31.26.181
-  nfsPath: /srv/nfs/caresync/dev/doctor
+  storageClassName: "nfs-client"    # ← dynamic provisioning
   resources:
     requests:
       cpu: 200m
@@ -140,8 +137,7 @@ appointmentMongodb:
   tag: "7.0"
   port: 27017
   storage: 2Gi
-  nfsServer: 172.31.26.181
-  nfsPath: /srv/nfs/caresync/dev/appointment
+  storageClassName: "nfs-client"    # ← dynamic provisioning
   resources:
     requests:
       cpu: 200m
