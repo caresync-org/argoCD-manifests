@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: gateway-dev
+  namespace: argocd
+  labels:
+    environment: dev
+    service: gateway
+spec:
+  project: caresync
+  source:
+    repoURL: https://github.com/caresync-org/argoCD-manifests
+    targetRevision: dev
+    path: charts/gateway
+    helm:
+      valueFiles:
+        - ../../values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: caresync-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

@@ -1,0 +1,34 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: auth-mongodb-prod
+  namespace: argocd
+  labels:
+    environment: prod
+    service: auth-mongodb
+spec:
+  project: caresync
+  source:
+    repoURL: https://github.com/caresync-org/argoCD-manifests
+    targetRevision: production
+    path: charts/mongodb
+    helm:
+      releaseName: auth-mongodb
+      valueFiles:
+        - ../../values.yaml
+      parameters:
+        - name: instanceDatabase
+          value: auth
+        - name: instancePairedService
+          value: auth-service
+        - name: global.namespace
+          value: caresync-prod
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: caresync-prod
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

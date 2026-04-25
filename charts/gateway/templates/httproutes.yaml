@@ -1,0 +1,45 @@
+apiVersion: gateway.networking.k8s.io/v1
+kind: HTTPRoute
+metadata:
+  name: caresync-routes
+  namespace: {{ .Values.global.namespace }}
+spec:
+  parentRefs:
+    - name: caresync-gateway
+      namespace: {{ .Values.global.namespace }}
+  rules:
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/auth
+      backendRefs:
+        - name: auth-service
+          port: 4001
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/patients
+      backendRefs:
+        - name: patient-service
+          port: 4002
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/doctors
+      backendRefs:
+        - name: doctor-service
+          port: 4003
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /api/appointments
+      backendRefs:
+        - name: appointment-service
+          port: 4004
+    - matches:
+        - path:
+            type: PathPrefix
+            value: /
+      backendRefs:
+        - name: frontend
+          port: 3000

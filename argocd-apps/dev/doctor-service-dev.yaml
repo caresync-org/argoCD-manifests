@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: doctor-service-dev
+  namespace: argocd
+  labels:
+    environment: dev
+    service: doctor-service
+spec:
+  project: caresync
+  source:
+    repoURL: https://github.com/caresync-org/argoCD-manifests
+    targetRevision: dev
+    path: charts/doctor-service
+    helm:
+      valueFiles:
+        - ../../values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: caresync-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

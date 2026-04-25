@@ -1,0 +1,26 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: frontend-dev
+  namespace: argocd
+  labels:
+    environment: dev
+    service: frontend
+spec:
+  project: caresync
+  source:
+    repoURL: https://github.com/caresync-org/argoCD-manifests
+    targetRevision: dev
+    path: charts/frontend
+    helm:
+      valueFiles:
+        - ../../values.yaml
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: caresync-dev
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

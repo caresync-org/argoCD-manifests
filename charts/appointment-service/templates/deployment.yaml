@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: appointment-service
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: appointment-service
+spec:
+  replicas: {{ .Values.appointment.replicaCount }}
+  selector:
+    matchLabels:
+      app: appointment-service
+  template:
+    metadata:
+      labels:
+        app: appointment-service
+    spec:
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        fsGroup: 1000
+      containers:
+        - name: appointment-service
+          image: "{{ .Values.global.organization }}/{{ .Values.appointment.image.repository }}:{{ .Values.appointment.image.tag }}"
+          imagePullPolicy: {{ .Values.global.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.appointment.service.port }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            readOnlyRootFilesystem: false
+          envFrom:
+            - configMapRef:
+                name: appointment-service-config
+          env:
+            - name: MONGO_URI
+              valueFrom:
+                secretKeyRef:
+                  name: appointment-secret
+                  key: mongoUri
+          resources:
+            requests:
+              cpu: {{ .Values.appointment.resources.requests.cpu }}
+              memory: {{ .Values.appointment.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.appointment.resources.limits.cpu }}
+              memory: {{ .Values.appointment.resources.limits.memory }}
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.appointment.service.port }}
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.appointment.service.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3

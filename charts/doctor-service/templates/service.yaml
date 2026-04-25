@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: doctor-service
+  namespace: {{ .Values.global.namespace }}
+  labels:
+    app: doctor-service
+spec:
+  type: ClusterIP
+  selector:
+    app: doctor-service
+  ports:
+    - port: {{ .Values.doctor.service.port }}
+      targetPort: {{ .Values.doctor.service.port }}
+      protocol: TCP
