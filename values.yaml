@@ -1,134 +1,128 @@
 # =============================================================================
 # ArgoCD Manifest — values.yaml
-# Repository : medimesh-org/argocd-manifests
+# Repository : caresync-org/argoCD-manifests
+# Branch     : dev
 #
-# This file is automatically updated by the CI/CD pipeline (Job 8 — CD).
+# This file is automatically updated by the CI/CD pipeline (Job 5 — CD).
 # ArgoCD watches this repo and syncs to the cluster on every commit.
-#
-# Naming convention: medimesh-<service>
 # =============================================================================
 
-# ---------------------------------------------------------------------------
-# Global settings
-# ---------------------------------------------------------------------------
 global:
   registry: docker.io
+  organization: nandana2002
   pullPolicy: IfNotPresent
-  namespace: medimesh
+  namespace: caresync-dev
 
-# ---------------------------------------------------------------------------
-# Auth Service
-# ---------------------------------------------------------------------------
 auth:
   enabled: true
-  replicaCount: 2
+  replicaCount: 1
   image:
-    repository: medimesh-auth
-    tag: dev-0000000       # ← Auto-updated by CI/CD pipeline
+    repository: caresync-auth
+    tag: dev-0000000
   service:
-    port: 5001
+    port: 4001
   env:
-    MONGO_URI: "mongodb://mongodb:27017/auth"
+    NODE_ENV: development
+    MONGO_URI: "mongodb://auth-mongodb:27017/auth"
     JWT_SECRET: "change-me-in-production"
   resources:
     requests:
       cpu: "100m"
       memory: "128Mi"
     limits:
-      cpu: "500m"
+      cpu: "300m"
       memory: "256Mi"
 
-# ---------------------------------------------------------------------------
-# Doctor Service
-# ---------------------------------------------------------------------------
-doctor:
-  enabled: true
-  replicaCount: 2
-  image:
-    repository: medimesh-doctor
-    tag: dev-0000000       # ← Auto-updated by CI/CD pipeline
-  service:
-    port: 5002
-  env:
-    MONGO_URI: "mongodb://mongodb:27017/doctor"
-  resources:
-    requests:
-      cpu: "100m"
-      memory: "128Mi"
-    limits:
-      cpu: "500m"
-      memory: "256Mi"
-
-# ---------------------------------------------------------------------------
-# Patient Service
-# ---------------------------------------------------------------------------
 patient:
   enabled: true
-  replicaCount: 2
+  replicaCount: 1
   image:
-    repository: medimesh-patient
-    tag: dev-0000000       # ← Auto-updated by CI/CD pipeline
+    repository: caresync-patient
+    tag: dev-0000000
   service:
-    port: 5003
+    port: 4002
   env:
-    MONGO_URI: "mongodb://mongodb:27017/patient"
+    NODE_ENV: development
+    MONGO_URI: "mongodb://patient-mongodb:27017/patient"
   resources:
     requests:
       cpu: "100m"
       memory: "128Mi"
     limits:
-      cpu: "500m"
+      cpu: "300m"
       memory: "256Mi"
 
-# ---------------------------------------------------------------------------
-# Appointment Service
-# ---------------------------------------------------------------------------
+doctor:
+  enabled: true
+  replicaCount: 1
+  image:
+    repository: caresync-doctor
+    tag: dev-0000000
+  service:
+    port: 4003
+  env:
+    NODE_ENV: development
+    MONGO_URI: "mongodb://doctor-mongodb:27017/doctor"
+  resources:
+    requests:
+      cpu: "100m"
+      memory: "128Mi"
+    limits:
+      cpu: "300m"
+      memory: "256Mi"
+
 appointment:
   enabled: true
-  replicaCount: 2
+  replicaCount: 1
   image:
-    repository: medimesh-appointment
-    tag: dev-0000000       # ← Auto-updated by CI/CD pipeline
+    repository: caresync-appointment
+    tag: dev-0000000
   service:
-    port: 5004
+    port: 4004
   env:
-    MONGO_URI: "mongodb://mongodb:27017/appointment"
+    NODE_ENV: development
+    MONGO_URI: "mongodb://appointment-mongodb:27017/appointment"
   resources:
     requests:
       cpu: "100m"
       memory: "128Mi"
     limits:
-      cpu: "500m"
+      cpu: "300m"
       memory: "256Mi"
 
-# ---------------------------------------------------------------------------
-# Frontend
-# ---------------------------------------------------------------------------
 frontend:
   enabled: true
-  replicaCount: 2
+  replicaCount: 1
   image:
-    repository: medimesh-frontend
-    tag: dev-0000000       # ← Auto-updated by CI/CD pipeline
+    repository: caresync-frontend
+    tag: dev-0000000
   service:
+    type: ClusterIP
     port: 3000
-    type: LoadBalancer
   resources:
     requests:
       cpu: "100m"
       memory: "128Mi"
     limits:
-      cpu: "500m"
+      cpu: "300m"
       memory: "512Mi"
 
-# ---------------------------------------------------------------------------
-# MongoDB (shared, in-cluster — replace with Atlas in production)
-# ---------------------------------------------------------------------------
 mongodb:
-  enabled: true
   image:
     repository: mongo
     tag: "7.0"
+  replicas: 1
   persistence:
     enabled: true
-    size: 10Gi
+    storageClass: nfs-storage
+    accessMode: ReadWriteMany
+    size: 2Gi
+
+gateway:
+  className: kgateway
+  port: 80
+  protocol: HTTP
+  nodePort: 30080
+
+instanceDatabase: ""
+instancePairedService: ""
