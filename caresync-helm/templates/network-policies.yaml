@@ -515,7 +515,6 @@ spec:
           port: 53
         - protocol: TCP
           port: 53
-{{- end }}
 ---
 # ── Allow External Traffic to Gateway ────────────────────────────────────────
 apiVersion: networking.k8s.io/v1
