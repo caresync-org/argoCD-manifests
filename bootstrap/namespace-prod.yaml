@@ -1,7 +1,0 @@
-apiVersion: v1
-kind: Namespace
-metadata:
-  name: caresync-prod
-  labels:
-    environment: prod
-    managed-by: argocd
