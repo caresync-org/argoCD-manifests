@@ -148,6 +148,7 @@ appointmentMongodb:
 
 config:
   nodeEnv: development
+  jwtExpiresIn: "7d"  
   authServiceUrl: http://caresync-auth-service.caresync-dev.svc.cluster.local:4001
   patientServiceUrl: http://caresync-patient-service.caresync-dev.svc.cluster.local:4002
   doctorServiceUrl: http://caresync-doctor-service.caresync-dev.svc.cluster.local:4003

@@ -9,7 +9,8 @@ data:
   PATIENT_SERVICE_URL: {{ .Values.config.patientServiceUrl }}
   DOCTOR_SERVICE_URL: {{ .Values.config.doctorServiceUrl }}
   APPOINTMENT_SERVICE_URL: {{ .Values.config.appointmentServiceUrl }}
-  AUTH_MONGO_URI: {{ .Values.config.authMongoUri }}
-  PATIENT_MONGO_URI: {{ .Values.config.patientMongoUri }}
-  DOCTOR_MONGO_URI: {{ .Values.config.doctorMongoUri }}
-  APPOINTMENT_MONGO_URI: {{ .Values.config.appointmentMongoUri }}
+  AUTH_MONGO_URI: {{ .Values.config.authMongoUri | quote }}
+  PATIENT_MONGO_URI: {{ .Values.config.patientMongoUri | quote }}
+  DOCTOR_MONGO_URI: {{ .Values.config.doctorMongoUri | quote }}
+  APPOINTMENT_MONGO_URI: {{ .Values.config.appointmentMongoUri | quote }}
+  JWT_EXPIRES_IN: {{ .Values.config.jwtExpiresIn | quote }}
