@@ -1,0 +1,80 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: caresync-dev
+  namespace: argocd
+  labels:
+    environment: development
+    project: caresync
+  annotations:
+    argocd.argoproj.io/manifest-generate-paths: .
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/caresync-org/argoCD-manifests.git
+    targetRevision: dev
+    path: caresync-helm
+    helm:
+      valueFiles:
+        - values-dev.yaml
+
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: caresync-dev
+
+  ignoreDifferences:
+    - group: ""
+      kind: PersistentVolumeClaim
+      name: caresync-auth-mongodb-development-pvc
+      namespace: caresync-dev
+      jsonPointers:
+        - /spec/storageClassName
+        - /spec/volumeName
+        - /spec/volumeMode
+        - /status
+        - /metadata/finalizers
+    - group: ""
+      kind: PersistentVolumeClaim
+      name: caresync-patient-mongodb-development-pvc
+      namespace: caresync-dev
+      jsonPointers:
+        - /spec/storageClassName
+        - /spec/volumeName
+        - /spec/volumeMode
+        - /status
+        - /metadata/finalizers
+    - group: ""
+      kind: PersistentVolumeClaim
+      name: caresync-doctor-mongodb-development-pvc
+      namespace: caresync-dev
+      jsonPointers:
+        - /spec/storageClassName
+        - /spec/volumeName
+        - /spec/volumeMode
+        - /status
+        - /metadata/finalizers
+    - group: ""
+      kind: PersistentVolumeClaim
+      name: caresync-appointment-mongodb-development-pvc
+      namespace: caresync-dev
+      jsonPointers:
+        - /spec/storageClassName
+        - /spec/volumeName
+        - /spec/volumeMode
+        - /status
+        - /metadata/finalizers
+
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+      - PrunePropagationPolicy=foreground
+      - PruneLast=true
+    retry:
+      limit: 5
+      backoff:
+        duration: 5s
+        factor: 2
+        maxDuration: 3m
