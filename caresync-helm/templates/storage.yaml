@@ -1,19 +1,4 @@
-# ── Auth MongoDB PV + PVC (NFS) ───────────────────────────────────────────────
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: caresync-auth-mongodb-{{ .Values.global.environment }}-pv
-spec:
-  capacity:
-    storage: {{ .Values.authMongodb.storage }}
-  accessModes:
-    - ReadWriteMany
-  persistentVolumeReclaimPolicy: Retain
-  storageClassName: {{ .Values.authMongodb.storageClassName }}
-  nfs:
-    server: {{ .Values.authMongodb.nfsServer }}
-    path: {{ .Values.authMongodb.nfsPath }}
----
+# ── Auth MongoDB PVC (Dynamic NFS) ───────────────────────────────────────────
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -26,24 +11,8 @@ spec:
     requests:
       storage: {{ .Values.authMongodb.storage }}
   storageClassName: {{ .Values.authMongodb.storageClassName }}
-  volumeName: caresync-auth-mongodb-{{ .Values.global.environment }}-pv
 ---
-# ── Patient MongoDB PV + PVC (NFS) ────────────────────────────────────────────
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: caresync-patient-mongodb-{{ .Values.global.environment }}-pv
-spec:
-  capacity:
-    storage: {{ .Values.patientMongodb.storage }}
-  accessModes:
-    - ReadWriteMany
-  persistentVolumeReclaimPolicy: Retain
-  storageClassName: {{ .Values.patientMongodb.storageClassName }}
-  nfs:
-    server: {{ .Values.patientMongodb.nfsServer }}
-    path: {{ .Values.patientMongodb.nfsPath }}
----
+# ── Patient MongoDB PVC (Dynamic NFS) ────────────────────────────────────────
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -56,24 +25,8 @@ spec:
     requests:
       storage: {{ .Values.patientMongodb.storage }}
   storageClassName: {{ .Values.patientMongodb.storageClassName }}
-  volumeName: caresync-patient-mongodb-{{ .Values.global.environment }}-pv
 ---
-# ── Doctor MongoDB PV + PVC (NFS) ─────────────────────────────────────────────
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: caresync-doctor-mongodb-{{ .Values.global.environment }}-pv
-spec:
-  capacity:
-    storage: {{ .Values.doctorMongodb.storage }}
-  accessModes:
-    - ReadWriteMany
-  persistentVolumeReclaimPolicy: Retain
-  storageClassName: {{ .Values.doctorMongodb.storageClassName }}
-  nfs:
-    server: {{ .Values.doctorMongodb.nfsServer }}
-    path: {{ .Values.doctorMongodb.nfsPath }}
----
+# ── Doctor MongoDB PVC (Dynamic NFS) ─────────────────────────────────────────
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -86,24 +39,8 @@ spec:
     requests:
       storage: {{ .Values.doctorMongodb.storage }}
   storageClassName: {{ .Values.doctorMongodb.storageClassName }}
-  volumeName: caresync-doctor-mongodb-{{ .Values.global.environment }}-pv
 ---
-# ── Appointment MongoDB PV + PVC (NFS) ────────────────────────────────────────
-apiVersion: v1
-kind: PersistentVolume
-metadata:
-  name: caresync-appointment-mongodb-{{ .Values.global.environment }}-pv
-spec:
-  capacity:
-    storage: {{ .Values.appointmentMongodb.storage }}
-  accessModes:
-    - ReadWriteMany
-  persistentVolumeReclaimPolicy: Retain
-  storageClassName: {{ .Values.appointmentMongodb.storageClassName }}
-  nfs:
-    server: {{ .Values.appointmentMongodb.nfsServer }}
-    path: {{ .Values.appointmentMongodb.nfsPath }}
----
+# ── Appointment MongoDB PVC (Dynamic NFS) ────────────────────────────────────
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
@@ -116,4 +53,122 @@ spec:
     requests:
       storage: {{ .Values.appointmentMongodb.storage }}
   storageClassName: {{ .Values.appointmentMongodb.storageClassName }}
-  volumeName: caresync-appointment-mongodb-{{ .Values.global.environment }}-pv
+  # # ── Auth MongoDB PV + PVC (NFS) ───────────────────────────────────────────────
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: caresync-auth-mongodb-{{ .Values.global.environment }}-pv
+# spec:
+#   capacity:
+#     storage: {{ .Values.authMongodb.storage }}
+#   accessModes:
+#     - ReadWriteMany
+#   persistentVolumeReclaimPolicy: Retain
+#   storageClassName: {{ .Values.authMongodb.storageClassName }}
+#   nfs:
+#     server: {{ .Values.authMongodb.nfsServer }}
+#     path: {{ .Values.authMongodb.nfsPath }}
+# ---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: caresync-auth-mongodb-{{ .Values.global.environment }}-pvc
+#   namespace: {{ .Values.global.namespace }}
+# spec:
+#   accessModes:
+#     - ReadWriteMany
+#   resources:
+#     requests:
+#       storage: {{ .Values.authMongodb.storage }}
+#   storageClassName: {{ .Values.authMongodb.storageClassName }}
+#   volumeName: caresync-auth-mongodb-{{ .Values.global.environment }}-pv
+# ---
+# # ── Patient MongoDB PV + PVC (NFS) ────────────────────────────────────────────
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: caresync-patient-mongodb-{{ .Values.global.environment }}-pv
+# spec:
+#   capacity:
+#     storage: {{ .Values.patientMongodb.storage }}
+#   accessModes:
+#     - ReadWriteMany
+#   persistentVolumeReclaimPolicy: Retain
+#   storageClassName: {{ .Values.patientMongodb.storageClassName }}
+#   nfs:
+#     server: {{ .Values.patientMongodb.nfsServer }}
+#     path: {{ .Values.patientMongodb.nfsPath }}
+# ---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: caresync-patient-mongodb-{{ .Values.global.environment }}-pvc
+#   namespace: {{ .Values.global.namespace }}
+# spec:
+#   accessModes:
+#     - ReadWriteMany
+#   resources:
+#     requests:
+#       storage: {{ .Values.patientMongodb.storage }}
+#   storageClassName: {{ .Values.patientMongodb.storageClassName }}
+#   volumeName: caresync-patient-mongodb-{{ .Values.global.environment }}-pv
+# ---
+# # ── Doctor MongoDB PV + PVC (NFS) ─────────────────────────────────────────────
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: caresync-doctor-mongodb-{{ .Values.global.environment }}-pv
+# spec:
+#   capacity:
+#     storage: {{ .Values.doctorMongodb.storage }}
+#   accessModes:
+#     - ReadWriteMany
+#   persistentVolumeReclaimPolicy: Retain
+#   storageClassName: {{ .Values.doctorMongodb.storageClassName }}
+#   nfs:
+#     server: {{ .Values.doctorMongodb.nfsServer }}
+#     path: {{ .Values.doctorMongodb.nfsPath }}
+# ---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: caresync-doctor-mongodb-{{ .Values.global.environment }}-pvc
+#   namespace: {{ .Values.global.namespace }}
+# spec:
+#   accessModes:
+#     - ReadWriteMany
+#   resources:
+#     requests:
+#       storage: {{ .Values.doctorMongodb.storage }}
+#   storageClassName: {{ .Values.doctorMongodb.storageClassName }}
+#   volumeName: caresync-doctor-mongodb-{{ .Values.global.environment }}-pv
+# ---
+# # ── Appointment MongoDB PV + PVC (NFS) ────────────────────────────────────────
+# apiVersion: v1
+# kind: PersistentVolume
+# metadata:
+#   name: caresync-appointment-mongodb-{{ .Values.global.environment }}-pv
+# spec:
+#   capacity:
+#     storage: {{ .Values.appointmentMongodb.storage }}
+#   accessModes:
+#     - ReadWriteMany
+#   persistentVolumeReclaimPolicy: Retain
+#   storageClassName: {{ .Values.appointmentMongodb.storageClassName }}
+#   nfs:
+#     server: {{ .Values.appointmentMongodb.nfsServer }}
+#     path: {{ .Values.appointmentMongodb.nfsPath }}
+# ---
+# apiVersion: v1
+# kind: PersistentVolumeClaim
+# metadata:
+#   name: caresync-appointment-mongodb-{{ .Values.global.environment }}-pvc
+#   namespace: {{ .Values.global.namespace }}
+# spec:
+#   accessModes:
+#     - ReadWriteMany
+#   resources:
+#     requests:
+#       storage: {{ .Values.appointmentMongodb.storage }}
+#   storageClassName: {{ .Values.appointmentMongodb.storageClassName }}
+#   volumeName: caresync-appointment-mongodb-{{ .Values.global.environment }}-pv
