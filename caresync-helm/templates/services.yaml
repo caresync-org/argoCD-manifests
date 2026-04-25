@@ -1,0 +1,83 @@
+# ── Auth Service ──────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.auth.name }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  selector:
+    app: {{ .Values.auth.name }}
+  ports:
+    - port: {{ .Values.auth.port }}
+      targetPort: {{ .Values.auth.port }}
+  type: ClusterIP
+---
+# ── Patient Service ───────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.patient.name }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  selector:
+    app: {{ .Values.patient.name }}
+  ports:
+    - port: {{ .Values.patient.port }}
+      targetPort: {{ .Values.patient.port }}
+  type: ClusterIP
+---
+# ── Doctor Service ────────────────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.doctor.name }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  selector:
+    app: {{ .Values.doctor.name }}
+  ports:
+    - port: {{ .Values.doctor.port }}
+      targetPort: {{ .Values.doctor.port }}
+  type: ClusterIP
+---
+# ── Appointment Service ───────────────────────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.appointment.name }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  selector:
+    app: {{ .Values.appointment.name }}
+  ports:
+    - port: {{ .Values.appointment.port }}
+      targetPort: {{ .Values.appointment.port }}
+  type: ClusterIP
+---
+# ── Frontend Active Service (BlueGreen) ───────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.frontend.name }}-service
+  namespace: {{ .Values.global.namespace }}
+spec:
+  selector:
+    app: {{ .Values.frontend.name }}
+  ports:
+    - port: {{ .Values.frontend.port }}
+      targetPort: {{ .Values.frontend.port }}
+  type: ClusterIP
+---
+# ── Frontend Preview Service (BlueGreen) ──────────────────────────────────────
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.frontend.name }}-preview-service
+  namespace: {{ .Values.global.namespace }}
+spec:
+  selector:
+    app: {{ .Values.frontend.name }}
+  ports:
+    - port: {{ .Values.frontend.port }}
+      targetPort: {{ .Values.frontend.port }}
+  type: ClusterIP

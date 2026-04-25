@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: caresync-config
+  namespace: {{ .Values.global.namespace }}
+data:
+  NODE_ENV: {{ .Values.config.nodeEnv }}
+  AUTH_SERVICE_URL: {{ .Values.config.authServiceUrl }}
+  PATIENT_SERVICE_URL: {{ .Values.config.patientServiceUrl }}
+  DOCTOR_SERVICE_URL: {{ .Values.config.doctorServiceUrl }}
+  APPOINTMENT_SERVICE_URL: {{ .Values.config.appointmentServiceUrl }}
+  AUTH_MONGO_URI: {{ .Values.config.authMongoUri }}
+  PATIENT_MONGO_URI: {{ .Values.config.patientMongoUri }}
+  DOCTOR_MONGO_URI: {{ .Values.config.doctorMongoUri }}
+  APPOINTMENT_MONGO_URI: {{ .Values.config.appointmentMongoUri }}

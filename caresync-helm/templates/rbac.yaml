@@ -1,0 +1,154 @@
+# ── Frontend ServiceAccount + Role + RoleBinding ──────────────────────────────
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.frontend.name }}-sa
+  namespace: {{ .Values.global.namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Values.frontend.name }}-role
+  namespace: {{ .Values.global.namespace }}
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Values.frontend.name }}-rolebinding
+  namespace: {{ .Values.global.namespace }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.frontend.name }}-sa
+    namespace: {{ .Values.global.namespace }}
+roleRef:
+  kind: Role
+  name: {{ .Values.frontend.name }}-role
+  apiGroup: rbac.authorization.k8s.io
+---
+# ── Auth ServiceAccount + Role + RoleBinding ──────────────────────────────────
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.auth.name }}-sa
+  namespace: {{ .Values.global.namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Values.auth.name }}-role
+  namespace: {{ .Values.global.namespace }}
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Values.auth.name }}-rolebinding
+  namespace: {{ .Values.global.namespace }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.auth.name }}-sa
+    namespace: {{ .Values.global.namespace }}
+roleRef:
+  kind: Role
+  name: {{ .Values.auth.name }}-role
+  apiGroup: rbac.authorization.k8s.io
+---
+# ── Patient ServiceAccount + Role + RoleBinding ───────────────────────────────
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.patient.name }}-sa
+  namespace: {{ .Values.global.namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Values.patient.name }}-role
+  namespace: {{ .Values.global.namespace }}
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Values.patient.name }}-rolebinding
+  namespace: {{ .Values.global.namespace }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.patient.name }}-sa
+    namespace: {{ .Values.global.namespace }}
+roleRef:
+  kind: Role
+  name: {{ .Values.patient.name }}-role
+  apiGroup: rbac.authorization.k8s.io
+---
+# ── Doctor ServiceAccount + Role + RoleBinding ────────────────────────────────
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.doctor.name }}-sa
+  namespace: {{ .Values.global.namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Values.doctor.name }}-role
+  namespace: {{ .Values.global.namespace }}
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Values.doctor.name }}-rolebinding
+  namespace: {{ .Values.global.namespace }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.doctor.name }}-sa
+    namespace: {{ .Values.global.namespace }}
+roleRef:
+  kind: Role
+  name: {{ .Values.doctor.name }}-role
+  apiGroup: rbac.authorization.k8s.io
+---
+# ── Appointment ServiceAccount + Role + RoleBinding ───────────────────────────
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: {{ .Values.appointment.name }}-sa
+  namespace: {{ .Values.global.namespace }}
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ .Values.appointment.name }}-role
+  namespace: {{ .Values.global.namespace }}
+rules:
+  - apiGroups: [""]
+    resources: ["configmaps", "secrets"]
+    verbs: ["get", "list"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ .Values.appointment.name }}-rolebinding
+  namespace: {{ .Values.global.namespace }}
+subjects:
+  - kind: ServiceAccount
+    name: {{ .Values.appointment.name }}-sa
+    namespace: {{ .Values.global.namespace }}
+roleRef:
+  kind: Role
+  name: {{ .Values.appointment.name }}-role
+  apiGroup: rbac.authorization.k8s.io
