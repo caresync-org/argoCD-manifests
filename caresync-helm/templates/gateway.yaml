@@ -1,21 +1,6 @@
 ---
 # ── Gateway: NodePort proxy config (kgateway) ─────────────────────────────────
-apiVersion: v1
-kind: Service
-metadata:
-  name: {{ .Values.gateway.name }}-nodeport
-  namespace: {{ .Values.global.namespace }}
-  labels:
-    app: {{ .Values.gateway.name }}
-spec:
-  type: NodePort
-  selector:
-    app: {{ .Values.gateway.name }}
-  ports:
-    - name: http
-      port: {{ .Values.gateway.port }}
-      protocol: TCP
-      nodePort: {{ .Values.gateway.nodePort }}
+
 ---
 # ── Gateway Resource ──────────────────────────────────────────────────────────
 apiVersion: gateway.networking.k8s.io/v1
