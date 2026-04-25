@@ -64,7 +64,7 @@ helm upgrade --install nfs-provisioner \
   --set nfs.path=/exports/caresync \
   --set storageClass.name=nfs-storage \
   --set storageClass.reclaimPolicy=Retain \
-  --set storageClass.accessModes=ReadWriteMany
+  --set storageClass.accessModes=ReadWriteOnce
 
 echo "=== Waiting for NFS provisioner pod to be ready ==="
 kubectl wait --for=condition=available deployment/nfs-provisioner-nfs-subdir-external-provisioner \

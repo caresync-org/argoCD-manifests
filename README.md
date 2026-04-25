@@ -66,10 +66,7 @@ EC2-4: HAProxy (round-robin)
     └──► EC2-3: Worker Node 2 :30080
               │
               ▼
-         NodePort Service → caresync-gateway-nodeport
-              │
-              ▼
-         KGateway (Envoy) → caresync-gateway
+         KGateway (Envoy) Service (NodePort :30080)
               │
               ▼
          HTTPRoutes
@@ -255,19 +252,25 @@ docker push nandana2002/caresync-frontend:v1.0
 
 ---
 
-### PHASE 4: Update values.yaml with Real Image Tags
+### PHASE 4: Update values.yaml with Real Image Tags & Secrets
 
 ```bash
 # In the argoCD-manifests repo, on the dev branch:
-# Edit values.yaml and set all image tags:
+
+# 1. Edit values.yaml and set all image tags:
 #   auth.image.tag: "v1.0"
 #   patient.image.tag: "v1.0"
 #   doctor.image.tag: "v1.0"
 #   appointment.image.tag: "v1.0"
 #   frontend.image.tag: "v1.0"
 
-git add values.yaml
-git commit -m "chore: set initial image tags to v1.0"
+# 2. Add your JWT Secret to values-dev.yaml (for dev ONLY)
+#   secrets:
+#     create: true
+#     jwtSecret: "caresync_jwt_dev_secret_2024"
+
+git add values.yaml caresync-helm/values-dev.yaml
+git commit -m "chore: set initial image tags and jwt secret"
 git push origin dev
 ```
 
