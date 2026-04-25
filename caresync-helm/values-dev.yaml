@@ -159,7 +159,8 @@ config:
 
 secrets:
   create: true
-  jwtSecret: ""
+  jwtSecret: "caresync_jwt_dev_secret_2024"
+
 
 hpa:
   enabled: true

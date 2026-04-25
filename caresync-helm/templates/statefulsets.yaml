@@ -15,10 +15,6 @@ spec:
       labels:
         app: {{ .Values.authMongodb.name }}
     spec:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 999
-        fsGroup: 999
       containers:
         - name: mongodb
           image: {{ .Values.authMongodb.image }}:{{ .Values.authMongodb.tag }}
@@ -38,18 +34,24 @@ spec:
             exec:
               command:
                 - mongosh
+                - --quiet
                 - --eval
                 - "db.adminCommand('ping')"
             initialDelaySeconds: 30
             periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
           readinessProbe:
             exec:
               command:
                 - mongosh
+                - --quiet
                 - --eval
                 - "db.adminCommand('ping')"
-            initialDelaySeconds: 10
-            periodSeconds: 5
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
       volumes:
         - name: auth-mongo-storage
           persistentVolumeClaim:
@@ -85,10 +87,6 @@ spec:
       labels:
         app: {{ .Values.patientMongodb.name }}
     spec:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 999
-        fsGroup: 999
       containers:
         - name: mongodb
           image: {{ .Values.patientMongodb.image }}:{{ .Values.patientMongodb.tag }}
@@ -108,18 +106,24 @@ spec:
             exec:
               command:
                 - mongosh
+                - --quiet
                 - --eval
                 - "db.adminCommand('ping')"
             initialDelaySeconds: 30
             periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
           readinessProbe:
             exec:
               command:
                 - mongosh
+                - --quiet
                 - --eval
                 - "db.adminCommand('ping')"
-            initialDelaySeconds: 10
-            periodSeconds: 5
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
       volumes:
         - name: patient-mongo-storage
           persistentVolumeClaim:
@@ -155,10 +159,6 @@ spec:
       labels:
         app: {{ .Values.doctorMongodb.name }}
     spec:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 999
-        fsGroup: 999
       containers:
         - name: mongodb
           image: {{ .Values.doctorMongodb.image }}:{{ .Values.doctorMongodb.tag }}
@@ -178,18 +178,24 @@ spec:
             exec:
               command:
                 - mongosh
+                - --quiet
                 - --eval
                 - "db.adminCommand('ping')"
             initialDelaySeconds: 30
             periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
           readinessProbe:
             exec:
               command:
                 - mongosh
+                - --quiet
                 - --eval
                 - "db.adminCommand('ping')"
-            initialDelaySeconds: 10
-            periodSeconds: 5
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
       volumes:
         - name: doctor-mongo-storage
           persistentVolumeClaim:
@@ -225,10 +231,6 @@ spec:
       labels:
         app: {{ .Values.appointmentMongodb.name }}
     spec:
-      securityContext:
-        runAsNonRoot: true
-        runAsUser: 999
-        fsGroup: 999
       containers:
         - name: mongodb
           image: {{ .Values.appointmentMongodb.image }}:{{ .Values.appointmentMongodb.tag }}
@@ -248,18 +250,24 @@ spec:
             exec:
               command:
                 - mongosh
+                - --quiet
                 - --eval
                 - "db.adminCommand('ping')"
             initialDelaySeconds: 30
             periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
           readinessProbe:
             exec:
               command:
                 - mongosh
+                - --quiet
                 - --eval
                 - "db.adminCommand('ping')"
-            initialDelaySeconds: 10
-            periodSeconds: 5
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
       volumes:
         - name: appointment-mongo-storage
           persistentVolumeClaim:
