@@ -23,7 +23,7 @@ frontend:
 auth:
   name: caresync-auth-service
   image: caresync-auth
-  tag: "v0.0.2"
+  tag: "v0.0.4"
   replicas: 2
   port: 4001
   resources:
