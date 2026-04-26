@@ -2,11 +2,9 @@ global:
   namespace: caresync-prod
   environment: production
   imageTag: latest
-
 images:
   repository: nandana2002
   pullPolicy: Always
-
 # Frontend
 frontend:
   name: caresync-frontend
@@ -21,7 +19,6 @@ frontend:
     limits:
       cpu: 500m
       memory: 512Mi
-
 # Auth Service
 auth:
   name: caresync-auth-service
@@ -36,12 +33,11 @@ auth:
     limits:
       cpu: 500m
       memory: 512Mi
-
 # Patient Service
 patient:
   name: caresync-patient-service
   image: caresync-patient
-  tag: "latest"
+  tag: "v0.0.1"
   replicas: 2
   port: 4002
   resources:
@@ -51,7 +47,6 @@ patient:
     limits:
       cpu: 500m
       memory: 512Mi
-
 # Doctor Service
 doctor:
   name: caresync-doctor-service
@@ -66,7 +61,6 @@ doctor:
     limits:
       cpu: 500m
       memory: 512Mi
-
 # Appointment Service
 appointment:
   name: caresync-appointment-service
@@ -81,7 +75,6 @@ appointment:
     limits:
       cpu: 500m
       memory: 512Mi
-
 # Auth MongoDB
 authMongodb:
   name: caresync-auth-mongodb
@@ -89,7 +82,7 @@ authMongodb:
   tag: "7.0"
   port: 27017
   storage: 5Gi
-  storageClassName: "nfs-client"    # ← dynamic provisioning
+  storageClassName: "nfs-client" # ← dynamic provisioning
   resources:
     requests:
       cpu: 200m
@@ -97,7 +90,6 @@ authMongodb:
     limits:
       cpu: 500m
       memory: 512Mi
-
 # Patient MongoDB
 patientMongodb:
   name: caresync-patient-mongodb
@@ -105,7 +97,7 @@ patientMongodb:
   tag: "7.0"
   port: 27017
   storage: 5Gi
-  storageClassName: "nfs-client"    # ← dynamic provisioning
+  storageClassName: "nfs-client" # ← dynamic provisioning
   resources:
     requests:
       cpu: 200m
@@ -113,7 +105,6 @@ patientMongodb:
     limits:
       cpu: 500m
       memory: 512Mi
-
 # Doctor MongoDB
 doctorMongodb:
   name: caresync-doctor-mongodb
@@ -121,7 +112,7 @@ doctorMongodb:
   tag: "7.0"
   port: 27017
   storage: 5Gi
-  storageClassName: "nfs-client"    # ← dynamic provisioning
+  storageClassName: "nfs-client" # ← dynamic provisioning
   resources:
     requests:
       cpu: 200m
@@ -129,7 +120,6 @@ doctorMongodb:
     limits:
       cpu: 500m
       memory: 512Mi
-
 # Appointment MongoDB
 appointmentMongodb:
   name: caresync-appointment-mongodb
@@ -137,7 +127,7 @@ appointmentMongodb:
   tag: "7.0"
   port: 27017
   storage: 5Gi
-  storageClassName: "nfs-client"    # ← dynamic provisioning
+  storageClassName: "nfs-client" # ← dynamic provisioning
   resources:
     requests:
       cpu: 200m
@@ -145,7 +135,6 @@ appointmentMongodb:
     limits:
       cpu: 500m
       memory: 512Mi
-
 config:
   nodeEnv: production
   authServiceUrl: http://caresync-auth-service.caresync-prod.svc.cluster.local:4001
@@ -156,30 +145,24 @@ config:
   patientMongoUri: "mongodb://caresync-patient-mongodb.caresync-prod.svc.cluster.local:27017/patient-db"
   doctorMongoUri: "mongodb://caresync-doctor-mongodb.caresync-prod.svc.cluster.local:27017/doctor-db"
   appointmentMongoUri: "mongodb://caresync-appointment-mongodb.caresync-prod.svc.cluster.local:27017/appointment-db"
-
 secrets:
   create: true
   jwtSecret: ""
   useSealedSecrets: true
-
 hpa:
   enabled: true
   minReplicas: 2
   maxReplicas: 10
   cpuThreshold: 70
   memoryThreshold: 80
-
 gateway:
   name: caresync-gateway
   className: kgateway
   port: 80
   nodePort: 30081
-
 networkPolicies:
   enabled: true
-
 releaseName: caresync-prod
-
 # global:
 #   namespace: caresync-prod
 #   environment: production
