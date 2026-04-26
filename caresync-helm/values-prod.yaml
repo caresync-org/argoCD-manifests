@@ -11,7 +11,7 @@ images:
 frontend:
   name: caresync-frontend
   image: caresync-frontend
-  tag: v0.0.1
+  tag: "latest"
   replicas: 2
   port: 8080
   resources:
@@ -26,7 +26,7 @@ frontend:
 auth:
   name: caresync-auth-service
   image: caresync-auth
-  tag: v0.0.1
+  tag: "latest"
   replicas: 2
   port: 4001
   resources:
@@ -41,7 +41,7 @@ auth:
 patient:
   name: caresync-patient-service
   image: caresync-patient
-  tag: v0.0.1
+  tag: "latest"
   replicas: 2
   port: 4002
   resources:
@@ -56,7 +56,7 @@ patient:
 doctor:
   name: caresync-doctor-service
   image: caresync-doctor
-  tag: v0.0.1
+  tag: "latest"
   replicas: 2
   port: 4003
   resources:
@@ -71,7 +71,7 @@ doctor:
 appointment:
   name: caresync-appointment-service
   image: caresync-appointment
-  tag: v0.0.1
+  tag: "latest"
   replicas: 2
   port: 4004
   resources:
@@ -191,7 +191,7 @@ releaseName: caresync-prod
 # frontend:
 #   name: caresync-frontend
 #   image: caresync-frontend
-#   tag: v0.0.1
+#   tag: "latest"
 #   replicas: 2
 #   port: 8080
 #   resources:
@@ -205,7 +205,7 @@ releaseName: caresync-prod
 # auth:
 #   name: caresync-auth-service
 #   image: caresync-auth
-#   tag: v0.0.1
+#   tag: "latest"
 #   replicas: 2
 #   port: 4001
 #   resources:
@@ -219,7 +219,7 @@ releaseName: caresync-prod
 # patient:
 #   name: caresync-patient-service
 #   image: caresync-patient
-#   tag: v0.0.1
+#   tag: "latest"
 #   replicas: 2
 #   port: 4002
 #   resources:
@@ -233,7 +233,7 @@ releaseName: caresync-prod
 # doctor:
 #   name: caresync-doctor-service
 #   image: caresync-doctor
-#   tag: v0.0.1
+#   tag: "latest"
 #   replicas: 2
 #   port: 4003
 #   resources:
@@ -247,7 +247,7 @@ releaseName: caresync-prod
 # appointment:
 #   name: caresync-appointment-service
 #   image: caresync-appointment
-#   tag: v0.0.1
+#   tag: "latest"
 #   replicas: 2
 #   port: 4004
 #   resources:
