@@ -37,7 +37,7 @@ auth:
 patient:
   name: caresync-patient-service
   image: caresync-patient
-  tag: "v0.0.1"
+  tag: "v0.0.2"
   replicas: 2
   port: 4002
   resources:
