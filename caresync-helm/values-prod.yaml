@@ -159,7 +159,8 @@ config:
 
 secrets:
   create: true
-  jwtSecret: "caresync_jwt_prod_secret_2024"
+  jwtSecret: ""
+  useSealedSecrets: true
 
 hpa:
   enabled: true
@@ -336,7 +337,8 @@ releaseName: caresync-prod
 #   appointmentMongoUri: "mongodb://caresync-appointment-mongodb.caresync-prod.svc.cluster.local:27017/appointment-db"
 # secrets:
 #   create: true
-#   jwtSecret: "caresync_jwt_prod_secret_2024"
+#   jwtSecret: ""
+  useSealedSecrets: true
 # hpa:
 #   enabled: true
 #   minReplicas: 2
