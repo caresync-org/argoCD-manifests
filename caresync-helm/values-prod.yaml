@@ -65,7 +65,7 @@ doctor:
 appointment:
   name: caresync-appointment-service
   image: caresync-appointment
-  tag: "latest"
+  tag: "v0.0.2"
   replicas: 2
   port: 4004
   resources:
