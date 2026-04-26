@@ -338,7 +338,6 @@ releaseName: caresync-prod
 # secrets:
 #   create: true
 #   jwtSecret: ""
-  useSealedSecrets: true
 # hpa:
 #   enabled: true
 #   minReplicas: 2
