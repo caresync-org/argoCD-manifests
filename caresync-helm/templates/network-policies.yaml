@@ -1,0 +1,724 @@
+{{- if .Values.networkPolicies.enabled }}
+# ── Default Deny All ──────────────────────────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: default-deny-all
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector: {}
+  policyTypes:
+    - Ingress
+    - Egress
+---
+# ── Allow Gateway to Frontend ─────────────────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-gateway-to-frontend
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.frontend.name }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kgateway-system
+      ports:
+        - protocol: TCP
+          port: {{ .Values.frontend.port }}
+---
+# ── Allow Gateway to Auth ─────────────────────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-gateway-to-auth
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.auth.name }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kgateway-system
+      ports:
+        - protocol: TCP
+          port: {{ .Values.auth.port }}
+---
+# ── Allow Gateway to Patient ──────────────────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-gateway-to-patient
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.patient.name }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kgateway-system
+      ports:
+        - protocol: TCP
+          port: {{ .Values.patient.port }}
+---
+# ── Allow Gateway to Doctor ───────────────────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-gateway-to-doctor
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.doctor.name }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kgateway-system
+      ports:
+        - protocol: TCP
+          port: {{ .Values.doctor.port }}
+---
+# ── Allow Gateway to Appointment ──────────────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-gateway-to-appointment
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.appointment.name }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kgateway-system
+      ports:
+        - protocol: TCP
+          port: {{ .Values.appointment.port }}
+---
+# ── Frontend Network Policy ───────────────────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: caresync-frontend-netpol
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.frontend.name }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - {}
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.auth.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.auth.port }}
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.patient.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.patient.port }}
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.doctor.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.doctor.port }}
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.appointment.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.appointment.port }}
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# ── Auth Network Policy ───────────────────────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: caresync-auth-netpol
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.auth.name }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.frontend.name }}
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.patient.name }}
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.doctor.name }}
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.appointment.name }}
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kgateway-system
+      ports:
+        - protocol: TCP
+          port: {{ .Values.auth.port }}
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.authMongodb.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.authMongodb.port }}
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# ── Patient Network Policy ────────────────────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: caresync-patient-netpol
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.patient.name }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.frontend.name }}
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.appointment.name }}
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kgateway-system
+      ports:
+        - protocol: TCP
+          port: {{ .Values.patient.port }}
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.patientMongodb.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.patientMongodb.port }}
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.auth.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.auth.port }}
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# ── Doctor Network Policy ─────────────────────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: caresync-doctor-netpol
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.doctor.name }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.frontend.name }}
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.appointment.name }}
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kgateway-system
+      ports:
+        - protocol: TCP
+          port: {{ .Values.doctor.port }}
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.doctorMongodb.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.doctorMongodb.port }}
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.auth.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.auth.port }}
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# ── Appointment Network Policy ────────────────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: caresync-appointment-netpol
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.appointment.name }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.frontend.name }}
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kgateway-system
+      ports:
+        - protocol: TCP
+          port: {{ .Values.appointment.port }}
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.appointmentMongodb.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.appointmentMongodb.port }}
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.auth.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.auth.port }}
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.patient.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.patient.port }}
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.doctor.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.doctor.port }}
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# ── Auth MongoDB Network Policy ───────────────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: caresync-auth-mongodb-netpol
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.authMongodb.name }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.auth.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.authMongodb.port }}
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# ── Patient MongoDB Network Policy ────────────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: caresync-patient-mongodb-netpol
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.patientMongodb.name }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.patient.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.patientMongodb.port }}
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# ── Doctor MongoDB Network Policy ─────────────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: caresync-doctor-mongodb-netpol
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.doctorMongodb.name }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.doctor.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.doctorMongodb.port }}
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# ── Appointment MongoDB Network Policy ────────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: caresync-appointment-mongodb-netpol
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.appointmentMongodb.name }}
+  policyTypes:
+    - Ingress
+    - Egress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.appointment.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.appointmentMongodb.port }}
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kube-system
+      ports:
+        - protocol: UDP
+          port: 53
+        - protocol: TCP
+          port: 53
+---
+# ── Allow External Traffic to Gateway ────────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-external-to-gateway
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      gateway.networking.k8s.io/gateway-name: {{ .Values.gateway.name }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - ports:
+        - protocol: TCP
+          port: 80
+        - protocol: TCP
+          port: 8082
+        - protocol: TCP
+          port: 9091
+---
+# ── Allow Gateway to XDS ──────────────────────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-gateway-to-xds
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      gateway.networking.k8s.io/gateway-name: {{ .Values.gateway.name }}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - namespaceSelector:
+            matchLabels:
+              kubernetes.io/metadata.name: kgateway-system
+      ports:
+        - protocol: TCP
+          port: 9977
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: UDP
+          port: 53
+---
+# ── Allow Gateway Pod Egress to Services ─────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-gateway-pod-to-services
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      gateway.networking.k8s.io/gateway-name: {{ .Values.gateway.name }}
+  policyTypes:
+    - Egress
+  egress:
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.auth.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.auth.port }}
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.patient.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.patient.port }}
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.doctor.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.doctor.port }}
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.appointment.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.appointment.port }}
+    - to:
+        - podSelector:
+            matchLabels:
+              app: {{ .Values.frontend.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.frontend.port }}
+    - to:
+        - namespaceSelector: {}
+      ports:
+        - protocol: UDP
+          port: 53
+---
+# ── Allow Gateway Pod Ingress to Auth ────────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-gateway-pod-to-auth
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.auth.name }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              gateway.networking.k8s.io/gateway-name: {{ .Values.gateway.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.auth.port }}
+---
+# ── Allow Gateway Pod Ingress to Patient ─────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-gateway-pod-to-patient
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.patient.name }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              gateway.networking.k8s.io/gateway-name: {{ .Values.gateway.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.patient.port }}
+---
+# ── Allow Gateway Pod Ingress to Doctor ──────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-gateway-pod-to-doctor
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.doctor.name }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              gateway.networking.k8s.io/gateway-name: {{ .Values.gateway.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.doctor.port }}
+---
+# ── Allow Gateway Pod Ingress to Appointment ─────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-gateway-pod-to-appointment
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.appointment.name }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              gateway.networking.k8s.io/gateway-name: {{ .Values.gateway.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.appointment.port }}
+---
+# ── Allow Gateway Pod Ingress to Frontend ────────────────────────────────────
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: allow-gateway-pod-to-frontend
+  namespace: {{ .Values.global.namespace }}
+spec:
+  podSelector:
+    matchLabels:
+      app: {{ .Values.frontend.name }}
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+        - podSelector:
+            matchLabels:
+              gateway.networking.k8s.io/gateway-name: {{ .Values.gateway.name }}
+      ports:
+        - protocol: TCP
+          port: {{ .Values.frontend.port }}
+{{- end }}

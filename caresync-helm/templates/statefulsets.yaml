@@ -1,0 +1,287 @@
+# ── Auth MongoDB StatefulSet ───────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.authMongodb.name }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.authMongodb.name }}
+  serviceName: {{ .Values.authMongodb.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.authMongodb.name }}
+    spec:
+      containers:
+        - name: mongodb
+          image: {{ .Values.authMongodb.image }}:{{ .Values.authMongodb.tag }}
+          ports:
+            - containerPort: {{ .Values.authMongodb.port }}
+          volumeMounts:
+            - name: auth-mongo-storage
+              mountPath: /data/db
+          resources:
+            requests:
+              cpu: {{ .Values.authMongodb.resources.requests.cpu }}
+              memory: {{ .Values.authMongodb.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.authMongodb.resources.limits.cpu }}
+              memory: {{ .Values.authMongodb.resources.limits.memory }}
+          livenessProbe:
+            exec:
+              command:
+                - mongosh
+                - --quiet
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - mongosh
+                - --quiet
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
+      volumes:
+        - name: auth-mongo-storage
+          persistentVolumeClaim:
+            claimName: caresync-auth-mongodb-{{ .Values.global.environment }}-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.authMongodb.name }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  selector:
+    app: {{ .Values.authMongodb.name }}
+  ports:
+    - port: {{ .Values.authMongodb.port }}
+      targetPort: {{ .Values.authMongodb.port }}
+  clusterIP: None
+---
+# ── Patient MongoDB StatefulSet ────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.patientMongodb.name }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.patientMongodb.name }}
+  serviceName: {{ .Values.patientMongodb.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.patientMongodb.name }}
+    spec:
+      containers:
+        - name: mongodb
+          image: {{ .Values.patientMongodb.image }}:{{ .Values.patientMongodb.tag }}
+          ports:
+            - containerPort: {{ .Values.patientMongodb.port }}
+          volumeMounts:
+            - name: patient-mongo-storage
+              mountPath: /data/db
+          resources:
+            requests:
+              cpu: {{ .Values.patientMongodb.resources.requests.cpu }}
+              memory: {{ .Values.patientMongodb.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.patientMongodb.resources.limits.cpu }}
+              memory: {{ .Values.patientMongodb.resources.limits.memory }}
+          livenessProbe:
+            exec:
+              command:
+                - mongosh
+                - --quiet
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - mongosh
+                - --quiet
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
+      volumes:
+        - name: patient-mongo-storage
+          persistentVolumeClaim:
+            claimName: caresync-patient-mongodb-{{ .Values.global.environment }}-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.patientMongodb.name }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  selector:
+    app: {{ .Values.patientMongodb.name }}
+  ports:
+    - port: {{ .Values.patientMongodb.port }}
+      targetPort: {{ .Values.patientMongodb.port }}
+  clusterIP: None
+---
+# ── Doctor MongoDB StatefulSet ─────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.doctorMongodb.name }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.doctorMongodb.name }}
+  serviceName: {{ .Values.doctorMongodb.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.doctorMongodb.name }}
+    spec:
+      containers:
+        - name: mongodb
+          image: {{ .Values.doctorMongodb.image }}:{{ .Values.doctorMongodb.tag }}
+          ports:
+            - containerPort: {{ .Values.doctorMongodb.port }}
+          volumeMounts:
+            - name: doctor-mongo-storage
+              mountPath: /data/db
+          resources:
+            requests:
+              cpu: {{ .Values.doctorMongodb.resources.requests.cpu }}
+              memory: {{ .Values.doctorMongodb.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.doctorMongodb.resources.limits.cpu }}
+              memory: {{ .Values.doctorMongodb.resources.limits.memory }}
+          livenessProbe:
+            exec:
+              command:
+                - mongosh
+                - --quiet
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - mongosh
+                - --quiet
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
+      volumes:
+        - name: doctor-mongo-storage
+          persistentVolumeClaim:
+            claimName: caresync-doctor-mongodb-{{ .Values.global.environment }}-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.doctorMongodb.name }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  selector:
+    app: {{ .Values.doctorMongodb.name }}
+  ports:
+    - port: {{ .Values.doctorMongodb.port }}
+      targetPort: {{ .Values.doctorMongodb.port }}
+  clusterIP: None
+---
+# ── Appointment MongoDB StatefulSet ───────────────────────────────────────────
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ .Values.appointmentMongodb.name }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: {{ .Values.appointmentMongodb.name }}
+  serviceName: {{ .Values.appointmentMongodb.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.appointmentMongodb.name }}
+    spec:
+      containers:
+        - name: mongodb
+          image: {{ .Values.appointmentMongodb.image }}:{{ .Values.appointmentMongodb.tag }}
+          ports:
+            - containerPort: {{ .Values.appointmentMongodb.port }}
+          volumeMounts:
+            - name: appointment-mongo-storage
+              mountPath: /data/db
+          resources:
+            requests:
+              cpu: {{ .Values.appointmentMongodb.resources.requests.cpu }}
+              memory: {{ .Values.appointmentMongodb.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.appointmentMongodb.resources.limits.cpu }}
+              memory: {{ .Values.appointmentMongodb.resources.limits.memory }}
+          livenessProbe:
+            exec:
+              command:
+                - mongosh
+                - --quiet
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
+          readinessProbe:
+            exec:
+              command:
+                - mongosh
+                - --quiet
+                - --eval
+                - "db.adminCommand('ping')"
+            initialDelaySeconds: 15
+            periodSeconds: 10
+            timeoutSeconds: 10
+            failureThreshold: 3
+      volumes:
+        - name: appointment-mongo-storage
+          persistentVolumeClaim:
+            claimName: caresync-appointment-mongodb-{{ .Values.global.environment }}-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ .Values.appointmentMongodb.name }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  selector:
+    app: {{ .Values.appointmentMongodb.name }}
+  ports:
+    - port: {{ .Values.appointmentMongodb.port }}
+      targetPort: {{ .Values.appointmentMongodb.port }}
+  clusterIP: None

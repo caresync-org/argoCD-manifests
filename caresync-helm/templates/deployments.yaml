@@ -1,0 +1,313 @@
+# ── Auth Service Deployment ────────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.auth.name }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  replicas: {{ .Values.auth.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.auth.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.auth.name }}
+    spec:
+      serviceAccountName: {{ .Values.auth.name }}-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      initContainers:
+        - name: wait-for-auth-mongodb
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - until nc -z {{ .Values.authMongodb.name }} {{ .Values.authMongodb.port }}; do echo waiting for auth-mongodb; sleep 3; done
+      containers:
+        - name: auth-service
+          image: {{ .Values.images.repository }}/{{ .Values.auth.image }}:{{ .Values.auth.tag }}
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.auth.port }}
+          env:
+            - name: PORT
+              value: "{{ .Values.auth.port }}"
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: caresync-config
+                  key: NODE_ENV
+            - name: MONGO_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: caresync-config
+                  key: AUTH_MONGO_URI
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: caresync-secrets
+                  key: JWT_SECRET
+            - name: JWT_EXPIRES_IN 
+          resources:
+            requests:
+              cpu: {{ .Values.auth.resources.requests.cpu }}
+              memory: {{ .Values.auth.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.auth.resources.limits.cpu }}
+              memory: {{ .Values.auth.resources.limits.memory }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.auth.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.auth.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+---
+# ── Patient Service Deployment ─────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.patient.name }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  replicas: {{ .Values.patient.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.patient.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.patient.name }}
+    spec:
+      serviceAccountName: {{ .Values.patient.name }}-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      initContainers:
+        - name: wait-for-patient-mongodb
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - until nc -z {{ .Values.patientMongodb.name }} {{ .Values.patientMongodb.port }}; do echo waiting for patient-mongodb; sleep 3; done
+      containers:
+        - name: patient-service
+          image: {{ .Values.images.repository }}/{{ .Values.patient.image }}:{{ .Values.patient.tag }}
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.patient.port }}
+          env:
+            - name: PORT
+              value: "{{ .Values.patient.port }}"
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: caresync-config
+                  key: NODE_ENV
+            - name: MONGO_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: caresync-config
+                  key: PATIENT_MONGO_URI
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: caresync-secrets
+                  key: JWT_SECRET
+            - name: AUTH_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: caresync-config
+                  key: AUTH_SERVICE_URL
+          resources:
+            requests:
+              cpu: {{ .Values.patient.resources.requests.cpu }}
+              memory: {{ .Values.patient.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.patient.resources.limits.cpu }}
+              memory: {{ .Values.patient.resources.limits.memory }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.patient.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.patient.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+---
+# ── Doctor Service Deployment ──────────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.doctor.name }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  replicas: {{ .Values.doctor.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.doctor.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.doctor.name }}
+    spec:
+      serviceAccountName: {{ .Values.doctor.name }}-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      initContainers:
+        - name: wait-for-doctor-mongodb
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - until nc -z {{ .Values.doctorMongodb.name }} {{ .Values.doctorMongodb.port }}; do echo waiting for doctor-mongodb; sleep 3; done
+      containers:
+        - name: doctor-service
+          image: {{ .Values.images.repository }}/{{ .Values.doctor.image }}:{{ .Values.doctor.tag }}
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.doctor.port }}
+          env:
+            - name: PORT
+              value: "{{ .Values.doctor.port }}"
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: caresync-config
+                  key: NODE_ENV
+            - name: MONGO_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: caresync-config
+                  key: DOCTOR_MONGO_URI
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: caresync-secrets
+                  key: JWT_SECRET
+            - name: AUTH_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: caresync-config
+                  key: AUTH_SERVICE_URL
+          resources:
+            requests:
+              cpu: {{ .Values.doctor.resources.requests.cpu }}
+              memory: {{ .Values.doctor.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.doctor.resources.limits.cpu }}
+              memory: {{ .Values.doctor.resources.limits.memory }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.doctor.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.doctor.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
+---
+# ── Appointment Service Deployment ────────────────────────────────────────────
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.appointment.name }}
+  namespace: {{ .Values.global.namespace }}
+spec:
+  replicas: {{ .Values.appointment.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.appointment.name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.appointment.name }}
+    spec:
+      serviceAccountName: {{ .Values.appointment.name }}-sa
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        fsGroup: 1000
+      initContainers:
+        - name: wait-for-appointment-mongodb
+          image: busybox:1.36
+          command:
+            - sh
+            - -c
+            - until nc -z {{ .Values.appointmentMongodb.name }} {{ .Values.appointmentMongodb.port }}; do echo waiting for appointment-mongodb; sleep 3; done
+      containers:
+        - name: appointment-service
+          image: {{ .Values.images.repository }}/{{ .Values.appointment.image }}:{{ .Values.appointment.tag }}
+          imagePullPolicy: {{ .Values.images.pullPolicy }}
+          ports:
+            - containerPort: {{ .Values.appointment.port }}
+          env:
+            - name: PORT
+              value: "{{ .Values.appointment.port }}"
+            - name: NODE_ENV
+              valueFrom:
+                configMapKeyRef:
+                  name: caresync-config
+                  key: NODE_ENV
+            - name: MONGO_URI
+              valueFrom:
+                configMapKeyRef:
+                  name: caresync-config
+                  key: APPOINTMENT_MONGO_URI
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: caresync-secrets
+                  key: JWT_SECRET
+            - name: AUTH_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: caresync-config
+                  key: AUTH_SERVICE_URL
+            - name: PATIENT_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: caresync-config
+                  key: PATIENT_SERVICE_URL
+            - name: DOCTOR_SERVICE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: caresync-config
+                  key: DOCTOR_SERVICE_URL
+          resources:
+            requests:
+              cpu: {{ .Values.appointment.resources.requests.cpu }}
+              memory: {{ .Values.appointment.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.appointment.resources.limits.cpu }}
+              memory: {{ .Values.appointment.resources.limits.memory }}
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.appointment.port }}
+            initialDelaySeconds: 30
+            periodSeconds: 20
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: {{ .Values.appointment.port }}
+            initialDelaySeconds: 10
+            periodSeconds: 10
