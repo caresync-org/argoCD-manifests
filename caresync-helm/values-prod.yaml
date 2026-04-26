@@ -9,7 +9,7 @@ images:
 frontend:
   name: caresync-frontend
   image: caresync-frontend
-  tag: "latest"
+  tag: "v0.0.1"
   replicas: 2
   port: 8080
   resources:
