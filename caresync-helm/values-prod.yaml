@@ -51,7 +51,7 @@ patient:
 doctor:
   name: caresync-doctor-service
   image: caresync-doctor
-  tag: "latest"
+  tag: "v0.0.2"
   replicas: 2
   port: 4003
   resources:
